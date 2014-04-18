@@ -4,9 +4,9 @@ namespace codenamegary\Lock;
 
 use Illuminate\Session\Store;
 use Illuminate\Http\Request;
-use DateTime, DateTimezone, DateInterval;
+use DateTime, DateTimezone, DateInterval, Log;
 
-class Lock {
+class Lock implements LockInterface {
     
     /**
      * @var Illuminate\Session\Store

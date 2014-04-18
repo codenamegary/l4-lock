@@ -35,19 +35,22 @@ class LockServiceProvider extends ServiceProvider {
         $this->router = $this->app['router'];
         $this->view = $this->app['view'];
         
-        $this->view->addNamespace('lock', __DIR__ . '/Views');
+        $this->view->addNamespace('lock', __DIR__ . '/../views');
+        $this->config->addNamespace('lock', __DIR__ . '/../config');
         
         $this->app->bindShared('lock.validator', function($app){
-            $users = $app['config']->get('lock.users', array());
+            $users = $app['config']->get('lock::lock.users', array());
             return new Validator($users);
         });
         
         $this->app->bindShared('lock', function($app){
-            $enabled = $app['config']->get('lock.enabled', true);
-            $sessionKey = $app['config']->get('lock.session.key', 'lock');
-            $expiry = $app['config']->get('lock.expiry', 300);
+            $enabled = $app['config']->get('lock::lock.enabled', true);
+            $sessionKey = $app['config']->get('lock::lock.session.key', 'lock');
+            $expiry = $app['config']->get('lock::lock.expiry', 300);
             return new Lock($app['session.store'], $app['request'], $app['lock.validator'], $enabled, $sessionKey, $expiry);            
         });
+        
+        $this->app->alias('lock', 'codenamegary\Lock\LockInterface');
         
         $this->app->bindShared('lock.filter', function($app){
             return new LockFilter(
@@ -61,12 +64,12 @@ class LockServiceProvider extends ServiceProvider {
         if($app['lock']->enabled())
         {
             
-            if($app['config']->get('lock.global', true))
+            if($app['config']->get('lock::lock.global', true))
             {
                 $app['app']->before(function($request)use($app){
                     $path = $request->path();
-                    $exceptions = array_values($app['config']->get('lock.urls'));
-                    if(!in_array($path, $exceptions)) $app['lock.filter']->auth();
+                    $exceptions = array_values($app['config']->get('lock::lock.urls'));
+                    if(!in_array($path, $exceptions)) return $app['lock.filter']->auth();
                 });
             } else {
                 $this->router->filter('lock.auth', function()use($app){
@@ -86,44 +89,19 @@ class LockServiceProvider extends ServiceProvider {
         $app = $this->app;
         $config = $app['config'];
         $router = $app['router'];
+        
+        $config->addNamespace('lock', __DIR__ . '/../config');
 
-        $router->get($config->get('lock.urls.login'), array(
+        $router->get($config->get('lock::lock.urls.login'), array(
             'as' => 'lock.login',
-            function($request)use($app, $config, $router){
-                return $app['view']->make($config->get('lock.views.login'), array(
-                    'title' => $config->get('lock.views.title'),
-                    'prompt' => $config->get('lock.views.prompt'),
-                    'foot-note' => $config->get('lock.views.foot-note'),
-                ))->render();
-            }
+            'uses' => 'codenamegary\Lock\LockController@getLogin',
         ));
         
-        $router->post($config->get('lock.urls.login'), function($request)use($app, $config, $router){
-            $lock = $app['lock'];
-            if($lock->expired())
-            {
-                $lock->logout();
-                $errors = new MessageBag;
-                $errors->add('error', 'Your login session has timed out. Please login again to continue.');
-                return $app['redirect']->to($config->get('lock.urls.login'))->withErrors($errors);
-            }
-            $input = $app['input']->only(array('username', 'password'));
-            if(!$lock->attempt($input['username'], $input['password']))
-            {
-                $errors = new MessageBag;
-                $errors->add('error', 'Sorry, invalid username or password.');
-                return $app['redirect']->to($config->get('lock.urls.login'))->withErrors($errors);
-            }
-            return $app['redirect']->to($lock->intended());
-        });
+        $router->post($config->get('lock::lock.urls.login'), 'codenamegary\Lock\LockController@postLogin');
         
-        $router->get($config->get('lock.urls.logout'), array(
+        $router->get($config->get('lock::lock.urls.logout'), array(
             'as' => 'lock.logout',
-            function($request)use($app, $config, $router){
-                $lock = $app['lock'];
-                $lock->logout();
-                return $app['redirect']->to('/');
-            }
+            'uses' => 'codenamegary\Lock\LockController@getLogout',
         ));
 
     }
