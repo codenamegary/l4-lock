@@ -23,7 +23,8 @@ return array(
     
     /**
      * Expire after this many seconds of inactivity and force another login,
-     * set to 0 or false to disable.
+     * set to 0 to expire whenever a user closes their browser or false to
+     * disable expiry completely and use the default Laravel session.
      */
     'expiry' => 60 * 20,
     

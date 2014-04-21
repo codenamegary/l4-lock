@@ -4,10 +4,16 @@ namespace codenamegary\Lock;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\MessageBag;
+use Illuminate\Cookie\CookieJar;
 
 class LockServiceProvider extends ServiceProvider {
     
     protected $defer = false;
+    
+    /**
+     * @var Illuminate\Cookie\CookieJar
+     */
+    protected $cookie;
     
     /**
      * @var Illuminate\Config\Repository
@@ -26,7 +32,12 @@ class LockServiceProvider extends ServiceProvider {
     
     public function register()
     {
+        $this->cookie = $this->app['cookie'];
+        $this->config = $this->app['config'];
+        $this->router = $this->app['router'];
+        $this->view = $this->app['view'];
         $this->registerRoutes();
+        $this->registerSessionDriver();
     }
     
     public function boot()
@@ -104,6 +115,25 @@ class LockServiceProvider extends ServiceProvider {
             'uses' => 'codenamegary\Lock\LockController@getLogout',
         ));
 
+    }
+
+    /**
+     * Register the session driver instance.
+     *
+     * @return void
+     */
+    protected function registerSessionDriver()
+    {
+        if(!$cookie = $this->cookie->get('lock'))
+        $this->app->bindShared('lock.session', function($app)
+        {
+            // First, we will create the session manager which is responsible for the
+            // creation of the various session drivers when they are needed by the
+            // application instance, and will resolve them on a lazy load basis.
+            $manager = $app['session'];
+
+            return $manager->driver();
+        });
     }
     
 }

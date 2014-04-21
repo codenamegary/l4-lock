@@ -48,6 +48,7 @@ class Lock implements LockInterface {
     
     public function __construct(Store $session, Request $request, Validator $validator, $enabled, $sessionKey, $expiry)
     {
+        
         $this->session = $session;
         $this->request = $request;
         $this->validator = $validator;
