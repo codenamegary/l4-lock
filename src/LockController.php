@@ -48,26 +48,19 @@ class LockController extends Controller {
     
     public function getLogin()
     {
-        $viewConfig = $this->config->get('lock::lock.views');
+        $viewConfig = $this->config->get('l4-lock::config.lock.views');
         if($this->view->exists($viewConfig['foot-note'])) $viewConfig['foot-note'] = $this->view->make($viewConfig['foot-note'])->render();
-        return $this->view->make($this->config->get('lock::lock.views.login'), array('view' => $viewConfig))->render();
+        return $this->view->make($this->config->get('l4-lock::config.lock.views.login'), array('view' => $viewConfig))->render();
     }
     
     public function postLogin()
     {
-        if($this->lock->expired())
-        {
-            $this->lock->logout();
-            $errors = new MessageBag;
-            $errors->add('error', 'Your login session has timed out. Please login again to continue.');
-            return $this->redirector->to($this->config->get('lock::lock.urls.login'))->withErrors($errors);
-        }
         $input = $this->request->only(array('username', 'password'));
         if(!$this->lock->attempt($input['username'], $input['password']))
         {
             $errors = new MessageBag;
             $errors->add('error', 'Sorry, invalid username or password.');
-            return $this->redirector->to($this->config->get('lock::lock.urls.login'))->withErrors($errors);
+            return $this->redirector->to($this->config->get('l4-lock::config.lock.urls.login'))->withErrors($errors);
         }
         return $this->redirector->to($this->lock->intended());
     }

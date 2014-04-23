@@ -29,10 +29,6 @@ interface LockInterface {
     
     public function logout();
     
-    public function expired();
-    
-    public function tick();
-    
     public function setIntended($url);
     
     public function intended($default = '/');

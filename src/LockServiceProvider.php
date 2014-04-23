@@ -32,89 +32,51 @@ class LockServiceProvider extends ServiceProvider {
     
     public function register()
     {
-        $this->cookie = $this->app['cookie'];
-        $this->config = $this->app['config'];
-        $this->router = $this->app['router'];
-        $this->view = $this->app['view'];
+        $this->package('codenamegary/l4-lock');
+        $this->registerNamespaces();
         $this->registerRoutes();
+        $this->registerValidator();
+        $this->registerSessionManager();
         $this->registerSessionDriver();
     }
     
     public function boot()
     {
-        $this->config = $this->app['config'];
-        $this->router = $this->app['router'];
-        $this->view = $this->app['view'];
-        
-        $this->view->addNamespace('lock', __DIR__ . '/../views');
-        $this->config->addNamespace('lock', __DIR__ . '/../config');
-        
-        $this->app->bindShared('lock.validator', function($app){
-            $users = $app['config']->get('lock::lock.users', array());
-            return new Validator($users);
+        $this->package('codenamegary/l4-lock');
+        $this->registerNamespaces();
+        $this->registerLock();
+        $this->registerFilter();
+        $this->configureFilters();
+        $this->registerMiddleware();
+    }
+    
+    protected function registerMiddleware()
+    {
+        $this->app->bindShared('l4-lock.middleware', function($app){
+           return new Middleware($app, $app['l4-lock.session']);
         });
-        
-        $this->app->bindShared('lock', function($app){
-            $enabled = $app['config']->get('lock::lock.enabled', true);
-            $sessionKey = $app['config']->get('lock::lock.session.key', 'lock');
-            $expiry = $app['config']->get('lock::lock.expiry', 300);
-            return new Lock($app['session.store'], $app['request'], $app['lock.validator'], $enabled, $sessionKey, $expiry);            
-        });
-        
-        $this->app->alias('lock', 'codenamegary\Lock\LockInterface');
-        
-        $this->app->bindShared('lock.filter', function($app){
-            return new LockFilter(
-                $app['lock'],
-                $app['redirect'],
-                $app['url']
-            );
-        });
-        
-        $app = $this->app;
-        if($app['lock']->enabled())
-        {
-            
-            if($app['config']->get('lock::lock.global', true))
-            {
-                $app['app']->before(function($request)use($app){
-                    $path = $request->path();
-                    $exceptions = array_values($app['config']->get('lock::lock.urls'));
-                    if(!in_array($path, $exceptions)) return $app['lock.filter']->auth();
-                });
-            } else {
-                $this->router->filter('lock.auth', function()use($app){
-                    return $app['lock.filter']->auth();
-                });
-            }
-                        
-            $app['app']->before(function()use($app){
-                $app['lock.filter']->tick();
-            });
-            
-        }
+        $this->app->middleware($this->app['l4-lock.middleware']);
+    }
+    
+    protected function registerNamespaces()
+    {
+        $this->app['config']->addNamespace('l4-lock', app_path('config/packages/codenamegary/l4-lock'));
+        $this->app['view']->addNamespace('l4-lock', __DIR__ . '/views');
     }
     
     public function registerRoutes()
     {
-        $app = $this->app;
-        $config = $app['config'];
-        $router = $app['router'];
-        
-        $config->addNamespace('lock', __DIR__ . '/../config');
-
-        $router->get($config->get('lock::lock.urls.login'), array(
-            'as' => 'lock.login',
+        $this->app['router']->get($this->app['config']->get('l4-lock::config.lock.urls.login'), array(
+            'as' => 'l4-lock.login',
             'uses' => 'codenamegary\Lock\LockController@getLogin',
         ));
         
-        $router->post($config->get('lock::lock.urls.login'), 'codenamegary\Lock\LockController@postLogin');
+        $this->app['router']->post($this->app['config']->get('l4-lock::config.lock.urls.login'), 'codenamegary\Lock\LockController@postLogin');
         
-        $router->get($config->get('lock::lock.urls.logout'), array(
-            'as' => 'lock.logout',
+        $this->app['router']->get($this->app['config']->get('l4-lock::config.lock.urls.logout'), array(
+            'as' => 'l4-lock.logout',
             'uses' => 'codenamegary\Lock\LockController@getLogout',
         ));
-
     }
 
     /**
@@ -122,18 +84,68 @@ class LockServiceProvider extends ServiceProvider {
      *
      * @return void
      */
+    protected function registerSessionManager()
+    {
+        $this->app->bindShared('l4-lock.session', function($app)
+        {
+            return new LockSessionManager($app);
+        });
+    }
+    
     protected function registerSessionDriver()
     {
-        if(!$cookie = $this->cookie->get('lock'))
-        $this->app->bindShared('lock.session', function($app)
-        {
-            // First, we will create the session manager which is responsible for the
-            // creation of the various session drivers when they are needed by the
-            // application instance, and will resolve them on a lazy load basis.
-            $manager = $app['session'];
-
+        $this->app->bindShared('l4-lock.session.store', function($app){
+            $manager = $app['l4-lock.session'];
             return $manager->driver();
         });
+        dd($this->app['l4-lock.session.store']);
+    }
+    
+    protected function registerValidator()
+    {
+        $this->app->bindShared('l4-lock.validator', function($app){
+            $users = $app['config']->get('l4-lock::config.lock.users', array());
+            return new Validator($users);
+        });
+    }
+    
+    protected function registerLock()
+    {
+        $this->app->bindShared('l4-lock', function($app){
+            $enabled = $app['config']->get('l4-lock::config.lock.enabled', true);
+            $sessionKey = $app['config']->get('l4-lock::config.lock.session.key', 'l4-lock');
+            return new Lock($app['l4-lock.session.store'], $app['request'], $app['l4-lock.validator'], $enabled, $sessionKey);            
+        });
+        $this->app->alias('l4-lock', 'codenamegary\Lock\LockInterface');
+    }
+    
+    protected function registerFilter()
+    {
+        $this->app->bindShared('l4-lock.filter', function($app){
+            return new LockFilter(
+                $app['l4-lock'],
+                $app['redirect'],
+                $app['url']
+            );
+        });
+    }
+    
+    protected function configureFilters()
+    {
+        if(!$this->app['l4-lock']->enabled()) return;
+        $app = $this->app;
+        if($this->app['config']->get('l4-lock::config.lock.global', true))
+        {
+            $this->app['app']->before(function($request)use($app){
+                $path = $request->path();
+                $exceptions = array_values($app['config']->get('l4-lock::config.lock.urls'));
+                if(!in_array($path, $exceptions)) return $app['l4-lock.filter']->auth();
+            });
+        } else {
+            $this->app['router']->filter('l4-lock.auth', function()use($app){
+                return $app['l4-lock.filter']->auth();
+            });
+        }
     }
     
 }

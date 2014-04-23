@@ -39,7 +39,7 @@ class Middleware extends BaseMiddleware {
      */
     public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
     {
-        if(false === $this->app['config']->get('lock::lock.enabled', false)) return $this->abort();
+        if(false === $this->app['config']->get('l4-lock::config.lock.enabled', false)) return $this->abort();
 
         $this->checkRequestForArraySessions($request);
 

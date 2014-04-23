@@ -39,22 +39,13 @@ class Lock implements LockInterface {
      */
     protected $enabled;
     
-    /**
-     * How many seconds a login is valid for.
-     * 
-     * @var integer
-     */
-    protected $expiry;
-    
-    public function __construct(Store $session, Request $request, Validator $validator, $enabled, $sessionKey, $expiry)
+    public function __construct(Store $session, Request $request, Validator $validator, $enabled, $sessionKey)
     {
-        
         $this->session = $session;
         $this->request = $request;
         $this->validator = $validator;
         $this->enabled = $enabled;
         $this->sessionKey = $sessionKey;
-        $this->expiry = $expiry;
     }
     
     protected function getSession($key, $default = false)
@@ -134,27 +125,6 @@ class Lock implements LockInterface {
         $this->forgetSession('user');
         $this->session->save();
         return $this;
-    }
-    
-    public function expired()
-    {
-        $tzUtc = new DateTimezone("UTC");
-        $now = new DateTime(null, $tzUtc);
-        $then = new DateTime($this->getSession('updated', gmdate('Y-m-d H:i:s')), $tzUtc);
-        $seconds = $now->getTimestamp() - $then->getTimestamp();
-        if($seconds > $this->expiry)
-        {
-            Log::info('Lock expired.');
-            return true;
-        }
-        Log::info('Lock not expired.');
-        return false;
-    }
-    
-    public function tick()
-    {
-        $this->putSession('updated', gmdate('Y-m-d H:i:s'));
-        $this->session->save();
     }
     
     public function setIntended($url)

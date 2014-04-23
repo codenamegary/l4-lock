@@ -46,7 +46,7 @@ class LockFilter {
     public function redirect()
     {
         $this->lock->setIntended($this->url->full());
-        return $this->redirector->route('lock.login');
+        return $this->redirector->route('l4-lock.login');
     }
     
     public function auth()
