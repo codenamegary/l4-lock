@@ -116,14 +116,12 @@ class Lock implements LockInterface {
         $user->username = $username;
         $user->loggedInAt = gmdate('Y-m-d H:i:s');
         $this->putSession('user', serialize($user));
-        $this->session->save();
         return true;
     }
     
     public function logout()
     {
         $this->forgetSession('user');
-        $this->session->save();
         return $this;
     }
     

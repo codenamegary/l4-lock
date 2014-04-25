@@ -10,34 +10,12 @@ class LockServiceProvider extends ServiceProvider {
     
     protected $defer = false;
     
-    /**
-     * @var Illuminate\Cookie\CookieJar
-     */
-    protected $cookie;
-    
-    /**
-     * @var Illuminate\Config\Repository
-     */
-    protected $config;
-    
-    /**
-     * @var Illuminate\Routing\Router
-     */
-    protected $router;
-    
-    /**
-     * @var Illuminate\View\Environment
-     */
-    protected $view;
-    
     public function register()
     {
         $this->package('codenamegary/l4-lock');
         $this->registerNamespaces();
         $this->registerRoutes();
         $this->registerValidator();
-        $this->registerSessionManager();
-        $this->registerSessionDriver();
     }
     
     public function boot()
@@ -47,15 +25,6 @@ class LockServiceProvider extends ServiceProvider {
         $this->registerLock();
         $this->registerFilter();
         $this->configureFilters();
-        $this->registerMiddleware();
-    }
-    
-    protected function registerMiddleware()
-    {
-        $this->app->bindShared('l4-lock.middleware', function($app){
-           return new Middleware($app, $app['l4-lock.session']);
-        });
-        $this->app->middleware($this->app['l4-lock.middleware']);
     }
     
     protected function registerNamespaces()
@@ -79,28 +48,6 @@ class LockServiceProvider extends ServiceProvider {
         ));
     }
 
-    /**
-     * Register the session driver instance.
-     *
-     * @return void
-     */
-    protected function registerSessionManager()
-    {
-        $this->app->bindShared('l4-lock.session', function($app)
-        {
-            return new LockSessionManager($app);
-        });
-    }
-    
-    protected function registerSessionDriver()
-    {
-        $this->app->bindShared('l4-lock.session.store', function($app){
-            $manager = $app['l4-lock.session'];
-            return $manager->driver();
-        });
-        dd($this->app['l4-lock.session.store']);
-    }
-    
     protected function registerValidator()
     {
         $this->app->bindShared('l4-lock.validator', function($app){
@@ -114,7 +61,7 @@ class LockServiceProvider extends ServiceProvider {
         $this->app->bindShared('l4-lock', function($app){
             $enabled = $app['config']->get('l4-lock::config.lock.enabled', true);
             $sessionKey = $app['config']->get('l4-lock::config.lock.session.key', 'l4-lock');
-            return new Lock($app['l4-lock.session.store'], $app['request'], $app['l4-lock.validator'], $enabled, $sessionKey);            
+            return new Lock($app['session.store'], $app['request'], $app['l4-lock.validator'], $enabled, $sessionKey);            
         });
         $this->app->alias('l4-lock', 'codenamegary\Lock\LockInterface');
     }
