@@ -28,7 +28,7 @@ class Lock implements LockInterface {
     /**
      * Lock user validator.
      * 
-     * @var codenamegary\Lock\Validator
+     * @var codenamegary\Lock\ValidatorInterface
      */
     protected $validator;
     
@@ -39,7 +39,7 @@ class Lock implements LockInterface {
      */
     protected $enabled;
     
-    public function __construct(Store $session, Request $request, Validator $validator, $enabled, $sessionKey)
+    public function __construct(Store $session, Request $request, ValidatorInterface $validator, $enabled, $sessionKey)
     {
         $this->session = $session;
         $this->request = $request;

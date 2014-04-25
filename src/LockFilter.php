@@ -55,9 +55,4 @@ class LockFilter {
         return $this->redirect();
     }
     
-    public function tick()
-    {
-        $this->lock->tick();
-    }
-    
 }

@@ -2,7 +2,7 @@
 
 namespace codenamegary\Lock;
 
-class Validator {
+class Validator implements ValidatorInterface {
     
     /**
      * Just simple key => value mapping of valid user => passwords.
@@ -19,11 +19,13 @@ class Validator {
     public function addUser($username, $password)
     {
         $this->validCredentials[$username] = $password;
+        return $this;
     }
     
     public function deleteUser($username)
     {
         if(array_key_exists($username, $this->validCredentials)) unset($this->validCredentials[$username]);
+        return $this;
     }
     
     public function setUsers(array $validCredentials)

@@ -61,7 +61,8 @@ class LockServiceProvider extends ServiceProvider {
         $this->app->bindShared('l4-lock', function($app){
             $enabled = $app['config']->get('l4-lock::config.lock.enabled', true);
             $sessionKey = $app['config']->get('l4-lock::config.lock.session.key', 'l4-lock');
-            return new Lock($app['session.store'], $app['request'], $app['l4-lock.validator'], $enabled, $sessionKey);            
+            $validatorBinding = $app['config']->get('l4-lock::config.lock.validator', 'l4-lock.validator');
+            return new Lock($app['session.store'], $app['request'], $app[$validatorBinding], $enabled, $sessionKey);            
         });
         $this->app->alias('l4-lock', 'codenamegary\Lock\LockInterface');
     }
