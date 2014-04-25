@@ -10,7 +10,7 @@ return array(
     /**
      * Enforce the lock across the entire site. If you'd rather enable
      * the lock selectively, disable this config option and apply
-     * the lock.auth filter on whichever routes you want locked.
+     * the l4-lock.auth filter on whichever routes you want locked.
      */
     'global' => true,
     

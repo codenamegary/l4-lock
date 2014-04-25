@@ -1,5 +1,19 @@
 <?php
 
+/**
+ * The login/logout controller.
+ * 
+ * There isn't much too this controller, it just logs users in and out
+ * using the lock object.
+ *
+ * @category   codenamegary
+ * @package    l4-lock
+ * @author     Gary Saunders <gary@codenamegary.com>
+ * @copyright  2014 Gary Saunders
+ * @license    http://opensource.org/licenses/MIT  MIT License
+ * @link       http://github.com/codenamegary/l4-lock
+ */
+ 
 namespace codenamegary\Lock;
 
 use Illuminate\Routing\Controller;
@@ -36,6 +50,15 @@ class LockController extends Controller {
      */
     protected $lock;
     
+    /**
+     * Dependencies here are automatically injected by Laravel.
+     * 
+     * @param Illuminate\View\Environment $view
+     * @param Illuminate\Http\Request $request
+     * @param Illuminate\Config\Repository $config
+     * @param Illuminate\Routing\Redirector $redirector
+     * @param codenamegary\Lock\LockInterface $lock
+     */
     public function __construct(View $view, Request $request, Config $config, Redirector $redirector, LockInterface $lock)
     {
         $this->view = $view;
@@ -43,9 +66,11 @@ class LockController extends Controller {
         $this->config = $config;
         $this->redirector = $redirector;
         $this->lock = $lock;
-        $disabled = $this->lock->disabled();
     }
     
+    /**
+     * Displays the login form.
+     */
     public function getLogin()
     {
         $viewConfig = $this->config->get('l4-lock::config.lock.views');
@@ -53,6 +78,9 @@ class LockController extends Controller {
         return $this->view->make($this->config->get('l4-lock::config.lock.views.login'), array('view' => $viewConfig))->render();
     }
     
+    /**
+     * Processes a post from the login form.
+     */
     public function postLogin()
     {
         $input = $this->request->only(array('username', 'password'));
@@ -65,6 +93,9 @@ class LockController extends Controller {
         return $this->redirector->to($this->lock->intended());
     }
     
+    /**
+     * Logs the user out and redirects to '/'.
+     */
     public function getLogout()
     {
         $this->lock->logout();

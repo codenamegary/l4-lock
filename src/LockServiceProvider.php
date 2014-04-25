@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * The lock service provider constructs all of the necessary dependencies
+ * and registers lock related bindings in the container.
+ * 
+ * @category   codenamegary
+ * @package    l4-lock
+ * @author     Gary Saunders <gary@codenamegary.com>
+ * @copyright  2014 Gary Saunders
+ * @license    http://opensource.org/licenses/MIT  MIT License
+ * @link       http://github.com/codenamegary/l4-lock
+ */
+ 
 namespace codenamegary\Lock;
 
 use Illuminate\Support\ServiceProvider;
@@ -27,12 +39,20 @@ class LockServiceProvider extends ServiceProvider {
         $this->configureFilters();
     }
     
+    /**
+     * Registers the proper configuration and view directory
+     * hints for the l4-lock prefix used by the Laravel
+     * config and view interfaces.
+     */
     protected function registerNamespaces()
     {
         $this->app['config']->addNamespace('l4-lock', app_path('config/packages/codenamegary/l4-lock'));
         $this->app['view']->addNamespace('l4-lock', __DIR__ . '/views');
     }
     
+    /**
+     * Registers the login and logout routes for the Lock.
+     */
     public function registerRoutes()
     {
         $this->app['router']->get($this->app['config']->get('l4-lock::config.lock.urls.login'), array(
@@ -47,7 +67,11 @@ class LockServiceProvider extends ServiceProvider {
             'uses' => 'codenamegary\Lock\LockController@getLogout',
         ));
     }
-
+    
+    /**
+     * Registers the binding for the default, config file based
+     * username and password validator.
+     */
     protected function registerValidator()
     {
         $this->app->bindShared('l4-lock.validator', function($app){
@@ -56,6 +80,11 @@ class LockServiceProvider extends ServiceProvider {
         });
     }
     
+    /**
+     * Constructs all of the dependencies for the Lock
+     * object and binds it to the container. Also
+     * aliases lock to the LockInterface.
+     */
     protected function registerLock()
     {
         $this->app->bindShared('l4-lock', function($app){
@@ -67,6 +96,9 @@ class LockServiceProvider extends ServiceProvider {
         $this->app->alias('l4-lock', 'codenamegary\Lock\LockInterface');
     }
     
+    /**
+     * Binds the lock filter to the container.
+     */
     protected function registerFilter()
     {
         $this->app->bindShared('l4-lock.filter', function($app){
@@ -78,6 +110,9 @@ class LockServiceProvider extends ServiceProvider {
         });
     }
     
+    /**
+     * Configures the lock filters based on the lock configuration.
+     */
     protected function configureFilters()
     {
         if(!$this->app['l4-lock']->enabled()) return;
