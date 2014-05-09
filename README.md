@@ -130,6 +130,21 @@ Next, apply the auth filter to any route that you want to protect.
            return View::make('hello')->render();
         }
     ));
+    
+###Global Filter Exceptions
+
+If you'd like to enable the global filter with some exceptions, just leave the global config option enabled and then add the patterns and strings you'd like to exclude to the exceptions config.
+
+
+    /**
+     * Here you can provide a list of regex URI patterns that will be excluded
+     * from the global filter. These are checked against the actual URI so
+     * so to exclude 'http://domain/thing/*', you would add an exception
+     * for '/thing\/.*?/'.
+     */
+    'exceptions' => array(
+        // Route exception patterns go here
+    ),
 
 ##Customizing the Login Screen
 
@@ -166,3 +181,4 @@ By default Lock uses /lock/login and /lock/logout to provide login/out functions
         'login' => 'lock/login',
         'logout' => 'lock/logout',
     ),
+    

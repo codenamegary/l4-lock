@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>/home/gary/sites/cou.gary.dev/mha/vendor/codenamegary/l4-lock/.README.md.html</title>
+<title>/home/gary/sites/twula.gary.dev/app/vendor/codenamegary/l4-lock/.README.md.html</title>
 
 
 <style type="text/css">
@@ -551,6 +551,18 @@ function setDocumentScrollTop(ypos)
        return View::make('hello')-&gt;render();
     }
 ));
+</code></pre> 
+<h3> <a name="user-content-global-filter-exceptions" class="anchor" href="..md.html#global-filter-exceptions"><span class="octicon octicon-link"></span></a>Global Filter Exceptions</h3> 
+<p>If you'd like to enable the global filter with some exceptions, just leave the global config option enabled and then add the patterns and strings you'd like to exclude to the exceptions config.</p> 
+<pre><code>/**
+ * Here you can provide a list of regex URI patterns that will be excluded
+ * from the global filter. These are checked against the actual URI so
+ * so to exclude 'http://domain/thing/*', you would add an exception
+ * for '/thing\/.*?/'.
+ */
+'exceptions' =&gt; array(
+    // Route exception patterns go here
+),
 </code></pre> 
 <h2> <a name="user-content-customizing-the-login-screen" class="anchor" href="..md.html#customizing-the-login-screen"><span class="octicon octicon-link"></span></a>Customizing the Login Screen</h2> 
 <p>Lock comes with a built-in Bootstrap3 style login screen. The config includes many settings that make it easy to change the login prompt and even use a different layout or view.</p> 
