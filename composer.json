@@ -1,0 +1,19 @@
+{
+    "name": "codenamegary/l4-lock",
+    "description": "A Laravel 4 package to lock down a site and require a simple username/password BEFORE auth is executed. Useful for doing things like locking down a site so a client can test before going live while without interfering with auth and other stock framework options.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Gary Saunders",
+            "email": "gary@codenamegary.com"
+        }
+    ],
+    "require": {
+        "laravel/framework": "4.1.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "codenamegary\\Lock\\": "src/"
+        }
+    }
+}
