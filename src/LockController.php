@@ -21,12 +21,12 @@ use Illuminate\Support\MessageBag;
 use Illuminate\Routing\Redirector;
 use Illuminate\Config\Repository as Config;
 use Illuminate\Http\Request as Request;
-use Illuminate\View\Environment as View;
+use Illuminate\View\Factory as ViewFactory;
 
 class LockController extends Controller {
 
     /**
-     * @var Illuminate\View\Environment
+     * @var Illuminate\View\Factory
      */
     protected $view;
     
@@ -53,13 +53,13 @@ class LockController extends Controller {
     /**
      * Dependencies here are automatically injected by Laravel.
      * 
-     * @param Illuminate\View\Environment $view
+     * @param Illuminate\View\Factory $view
      * @param Illuminate\Http\Request $request
      * @param Illuminate\Config\Repository $config
      * @param Illuminate\Routing\Redirector $redirector
      * @param codenamegary\Lock\LockInterface $lock
      */
-    public function __construct(View $view, Request $request, Config $config, Redirector $redirector, LockInterface $lock)
+    public function __construct(ViewFactory $view, Request $request, Config $config, Redirector $redirector, LockInterface $lock)
     {
         $this->view = $view;
         $this->request = $request;
