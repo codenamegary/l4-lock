@@ -20,10 +20,20 @@ Lock requires the default Laravel session to store credentials, so it must be co
 
 **NOTE:** Once installed, lock will be enabled globally by default. You can disable it through the package config.
 
-Add Lock to your composer.json.
+####Laravel 4.1
+
+Add Lock v0.2.1-beta to your composer.json.
 
     "require": {
-        "codenamegary/l4-lock": "dev-master"
+        "codenamegary/l4-lock": "v0.2.1-beta"
+    }
+
+####Laravel 4.2 or later
+
+Add Lock v0.2.2-beta or later to your composer.json.
+
+    "require": {
+        "codenamegary/l4-lock": "v0.2.2-beta"
     }
 
 Composer Update
